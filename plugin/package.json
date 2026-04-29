@@ -4,8 +4,8 @@
   "description": "Obsidian plugin for Nodepad",
   "main": "main.js",
   "scripts": {
-    "dev": "concurrently \"node esbuild.config.mjs\" \"npx @tailwindcss/cli -i src/styles.css -o styles.css --watch\"",
-    "build": "tsc --noEmit -p tsconfig.json && node esbuild.config.mjs production && npx @tailwindcss/cli -i src/styles.css -o styles.css"
+    "dev": "concurrently \"node esbuild.config.mjs\" \"npx @tailwindcss/cli -i src/styles.css -o dist/styles.css --watch\"",
+    "build": "tsc --noEmit -p tsconfig.json && node esbuild.config.mjs production && npx @tailwindcss/cli -i src/styles.css -o dist/styles.css"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.0.0",

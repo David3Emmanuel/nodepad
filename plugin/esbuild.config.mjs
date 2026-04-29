@@ -2,10 +2,13 @@ import esbuild from "esbuild"
 import process from "process"
 import builtins from "builtin-modules"
 import path from "path"
+import fs from "fs"
 import { fileURLToPath } from "url"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const prod = process.argv[2] === "production"
+
+fs.mkdirSync("dist", { recursive: true })
 
 const context = await esbuild.context({
   entryPoints: ["src/main.ts"],
@@ -36,13 +39,15 @@ const context = await esbuild.context({
   logLevel: "info",
   sourcemap: prod ? false : "inline",
   treeShaking: true,
-  outfile: "main.js",
+  outfile: "dist/main.js",
   jsx: "automatic",
 })
 
 if (prod) {
   await context.rebuild()
+  fs.copyFileSync("manifest.json", "dist/manifest.json")
   process.exit(0)
 } else {
+  fs.copyFileSync("manifest.json", "dist/manifest.json")
   await context.watch()
 }

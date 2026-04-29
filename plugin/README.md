@@ -16,23 +16,17 @@ npm install
 npm run build
 ```
 
-This produces `plugin/main.js` and `plugin/styles.css`.
+This produces the deployable files in `plugin/dist/`.
 
 ### 2. Copy files into your vault
 
-Create the plugin folder inside your vault:
+Copy `plugin/dist/` into your vault's plugin folder:
 
 ```
 <your-vault>/.obsidian/plugins/nodepad/
 ```
 
-Copy these three files into it:
-
-| File | Location after copy |
-|---|---|
-| `main.js` | `.obsidian/plugins/nodepad/main.js` |
-| `manifest.json` | `.obsidian/plugins/nodepad/manifest.json` |
-| `styles.css` | `.obsidian/plugins/nodepad/styles.css` |
+The `dist/` folder already contains all three required files — `main.js`, `manifest.json`, and `styles.css`.
 
 ### 3. Enable the plugin
 
@@ -101,16 +95,16 @@ From the command palette: **Export markdown** saves a `.md` file to your vault r
 
 ## Development (hot reload)
 
-Instead of copying files on every rebuild, symlink the plugin folder directly into your vault:
+Instead of copying files on every rebuild, symlink `plugin/dist/` directly into your vault:
 
 **macOS / Linux**
 ```bash
-ln -s "$(pwd)/plugin" "<your-vault>/.obsidian/plugins/nodepad"
+ln -s "$(pwd)/plugin/dist" "<your-vault>/.obsidian/plugins/nodepad"
 ```
 
 **Windows (PowerShell, run as Administrator)**
 ```powershell
-New-Item -ItemType Junction -Path "<your-vault>\.obsidian\plugins\nodepad" -Target (Resolve-Path .\plugin)
+New-Item -ItemType Junction -Path "<your-vault>\.obsidian\plugins\nodepad" -Target (Resolve-Path .\plugin\dist)
 ```
 
 Then start the dev watcher (JS + CSS in parallel):
