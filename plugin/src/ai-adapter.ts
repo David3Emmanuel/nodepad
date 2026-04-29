@@ -1,3 +1,4 @@
+import { requestUrl, type RequestUrlResponse } from "obsidian"
 import type NodepadPlugin from "./main"
 import {
   getBaseUrl,
@@ -6,9 +7,32 @@ import {
   type AIConfig,
   type AIProvider,
 } from "@/lib/ai-settings"
-import { parseProviderError, type EnrichContext, type EnrichResult } from "@/lib/ai-enrich"
+import { type EnrichContext, type EnrichResult } from "@/lib/ai-enrich"
 import { detectContentType } from "@/lib/detect-content-type"
 import type { GhostContext, GhostResult } from "@/lib/ai-ghost"
+
+// ── Error parsing (mirrors parseProviderError but for RequestUrlResponse) ──────
+
+function parseRequestError(res: RequestUrlResponse): string {
+  let errObj: { message?: string; metadata?: { provider_name?: string } } | undefined
+  try { errObj = (res.json as Record<string, unknown>)?.error as typeof errObj } catch { /* ignore */ }
+  const providerName = errObj?.metadata?.provider_name
+  switch (res.status) {
+    case 401: return "Invalid or missing API key. Check your key in Settings."
+    case 402: return "Insufficient credits. Add credits to your account or switch to a free model."
+    case 403: return "Content flagged by the provider's safety filter."
+    case 404: return "This model is no longer available. Switch to another model in Settings."
+    case 408: return "Request timed out. Try again."
+    case 429: return providerName
+      ? `${providerName} is rate-limiting free requests right now. Retry later or switch to a paid model.`
+      : "Too many requests. Slow down and try again."
+    case 502:
+    case 503: return providerName
+      ? `${providerName} is temporarily unavailable. Try again or switch models.`
+      : "The AI provider is temporarily unavailable. Try again."
+    default: return errObj?.message ?? `Request failed (${res.status}). Check your settings.`
+  }
+}
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -24,7 +48,7 @@ export function getPluginAIConfig(plugin: NodepadPlugin): AIConfig | null {
   }
 }
 
-// ── Anthropic direct fetch ────────────────────────────────────────────────────
+// ── Anthropic request ────────────────────────────────────────────────────────
 
 async function fetchAnthropic(
   config: AIConfig,
@@ -35,8 +59,9 @@ async function fetchAnthropic(
     system?: string
     temperature?: number
   }
-): Promise<Response> {
-  return fetch("https://api.anthropic.com/v1/messages", {
+): Promise<RequestUrlResponse> {
+  return requestUrl({
+    url: "https://api.anthropic.com/v1/messages",
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -44,6 +69,7 @@ async function fetchAnthropic(
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify(body),
+    throw: false,
   })
 }
 
@@ -99,7 +125,8 @@ Return ONLY valid JSON:
         messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
       })
-    : await fetch(`${getBaseUrl(config)}/chat/completions`, {
+    : await requestUrl({
+        url: `${getBaseUrl(config)}/chat/completions`,
         method: "POST",
         headers: getProviderHeaders(config),
         body: JSON.stringify({
@@ -109,13 +136,14 @@ Return ONLY valid JSON:
           response_format: { type: "json_object" },
           temperature: 0.7,
         }),
+        throw: false,
       })
 
-  if (!response.ok) throw new Error(await parseProviderError(response))
+  if (response.status >= 400) throw new Error(parseRequestError(response))
 
   let data: Record<string, unknown>
   try {
-    data = await response.json()
+    data = response.json as Record<string, unknown>
   } catch {
     throw new Error(`Ghost error (${config.provider}): response was not valid JSON`)
   }
@@ -144,10 +172,13 @@ export async function fetchUrlMeta(
   url: string
 ): Promise<{ title: string; description: string; excerpt: string; statusCode: number } | null> {
   try {
-    const res = await fetch(url, {
+    const res = await requestUrl({
+      url,
+      method: "GET",
       headers: { "User-Agent": "Mozilla/5.0 (compatible; Nodepad/1.0)" },
+      throw: false,
     })
-    const html = await res.text()
+    const html = res.text
     const title = html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1]?.trim() ?? ""
     const description =
       html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i)?.[1]?.trim() ?? ""
@@ -395,7 +426,8 @@ export async function enrichBlock(
         messages: [{ role: "user", content: userMessage }],
         temperature: 0.1,
       })
-    : await fetch(`${baseUrl}/chat/completions`, {
+    : await requestUrl({
+        url: `${baseUrl}/chat/completions`,
         method: "POST",
         headers: getProviderHeaders(config),
         body: JSON.stringify({
@@ -414,13 +446,14 @@ export async function enrichBlock(
               }
             : { web_search_options: webSearchOptions }),
         }),
+        throw: false,
       })
 
-  if (!response.ok) throw new Error(await parseProviderError(response))
+  if (response.status >= 400) throw new Error(parseRequestError(response))
 
   let data: Record<string, unknown>
   try {
-    data = await response.json()
+    data = response.json as Record<string, unknown>
   } catch {
     throw new Error(`AI enrich error (${config.provider}): response was not valid JSON`)
   }
