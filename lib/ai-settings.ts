@@ -59,6 +59,13 @@ export const AI_MODELS: AIModel[] = [
     supportsGrounding: false,
   },
   {
+    id: "anthropic/claude-sonnet-4-6",
+    label: "Claude Sonnet 4.6",
+    shortLabel: "Claude",
+    description: "Latest Claude Sonnet",
+    supportsGrounding: false,
+  },
+  {
     id: "openai/gpt-4o",
     label: "GPT-4o",
     shortLabel: "GPT-4o",
