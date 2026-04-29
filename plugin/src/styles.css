@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+/* Tell Tailwind v4 to scan the shared component and app files for classes */
+@source "../../components/**/*.tsx";
+@source "../../app/**/*.tsx";
+@source "../src/**/*.tsx";
+
+/* Map Tailwind's semantic tokens to Obsidian's CSS variables */
+@theme {
+  --color-background: var(--background-primary);
+  --color-foreground: var(--text-normal);
+  --color-muted: var(--text-muted);
+  --color-border: var(--background-modifier-border);
+}
+
+.nodepad-view {
+  height: 100%;
+  overflow: hidden;
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
