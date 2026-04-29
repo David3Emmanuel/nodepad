@@ -350,15 +350,18 @@ You have live web access. For this note type, include 1–2 real source citation
 
   const baseUrl = getBaseUrl(config)
   const response = isNativeAnthropic
-    ? await fetch(`${baseUrl}/messages`, {
+    ? await fetch("/api/anthropic", {
         method: "POST",
-        headers: getProviderHeaders(config),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model,
-          max_tokens: MAX_ENRICH_OUTPUT_TOKENS,
-          system: systemPrompt,
-          messages: [{ role: "user", content: userMessage }],
-          temperature: 0.1,
+          apiKey: config.apiKey,
+          body: {
+            model,
+            max_tokens: MAX_ENRICH_OUTPUT_TOKENS,
+            system: systemPrompt,
+            messages: [{ role: "user", content: userMessage }],
+            temperature: 0.1,
+          },
         }),
       })
     : await fetch(`${baseUrl}/chat/completions`, {

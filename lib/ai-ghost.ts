@@ -58,14 +58,17 @@ Return ONLY valid JSON:
 
   const baseUrl = getBaseUrl(config)
   const response = isNativeAnthropic
-    ? await fetch(`${baseUrl}/messages`, {
+    ? await fetch("/api/anthropic", {
         method: "POST",
-        headers: getProviderHeaders(config),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model,
-          max_tokens: MAX_GHOST_OUTPUT_TOKENS,
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.7,
+          apiKey: config.apiKey,
+          body: {
+            model,
+            max_tokens: MAX_GHOST_OUTPUT_TOKENS,
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.7,
+          },
         }),
       })
     : await fetch(`${baseUrl}/chat/completions`, {
