@@ -1,0 +1,23 @@
+{
+  "name": "nodepad-obsidian-plugin",
+  "version": "0.1.0",
+  "description": "Obsidian plugin for Nodepad",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc --noEmit -p tsconfig.json && node esbuild.config.mjs production"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "builtin-modules": "^4.0.0",
+    "esbuild": "0.21.5",
+    "obsidian": "latest",
+    "typescript": "5.7.3"
+  },
+  "dependencies": {
+    "react": "^19",
+    "react-dom": "^19"
+  }
+}
