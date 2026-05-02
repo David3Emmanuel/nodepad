@@ -103,6 +103,7 @@ export class NodepadView extends TextFileView {
     container.style.overflow = "hidden"
     container.style.contain = "layout paint"
     container.style.isolation = "isolate"
+    container.classList.add("nodepad-view")
     if (!this.root) {
       this.root = createRoot(container)
     }

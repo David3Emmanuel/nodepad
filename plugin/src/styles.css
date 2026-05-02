@@ -67,3 +67,11 @@
   background: var(--background-primary);
   color: var(--text-normal);
 }
+
+.nodepad-view svg {
+  width: unset;
+  height: unset;
+  overflow: visible;
+  display: inline-block;
+  flex-shrink: 0;
+}
