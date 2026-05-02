@@ -101,6 +101,8 @@ export class NodepadView extends TextFileView {
     const container = this.containerEl.children[1] as HTMLElement
     container.style.height = "100%"
     container.style.overflow = "hidden"
+    container.style.contain = "layout paint"
+    container.style.isolation = "isolate"
     if (!this.root) {
       this.root = createRoot(container)
     }
@@ -121,6 +123,7 @@ export class NodepadView extends TextFileView {
             setting?.open()
             setting?.openTabById(plugin.manifest.id)
           }}
+          portalContainer={container}
         />
       </React.StrictMode>
     )
@@ -135,9 +138,10 @@ interface NodepadAppProps {
   fileName?: string
   onSave: (data: string) => void
   onMenuClick: () => void
+  portalContainer?: HTMLElement
 }
 
-function NodepadApp({ plugin, initialData, fileName, onSave, onMenuClick }: NodepadAppProps) {
+function NodepadApp({ plugin, initialData, fileName, onSave, onMenuClick, portalContainer }: NodepadAppProps) {
   const parsed = useMemo(() => parseFileData(initialData), [initialData])
 
   const [blocks, setBlocks] = useState<TextBlock[]>(parsed.blocks)
@@ -531,6 +535,7 @@ function NodepadApp({ plugin, initialData, fileName, onSave, onMenuClick }: Node
           onIndexToggle={() => setIsIndexOpen(prev => !prev)}
           onGhostPanelToggle={() => setIsGhostPanelOpen(prev => !prev)}
           modelLabel={modelLabel}
+          portalContainer={portalContainer}
         />
 
         {!hasKey && (
