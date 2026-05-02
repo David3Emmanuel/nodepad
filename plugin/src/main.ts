@@ -1,4 +1,4 @@
-import { Plugin } from "obsidian"
+import { Plugin, TFolder } from "obsidian"
 import { NodepadView, VIEW_TYPE } from "./view"
 import { NodepadSettingTab, type NodepadSettings, DEFAULT_SETTINGS } from "./settings"
 
@@ -19,12 +19,31 @@ export default class NodepadPlugin extends Plugin {
       callback: () => this.createNewSpace(),
     })
 
+    this.registerEvent(
+      this.app.workspace.on("file-menu", (menu, item) => {
+        if (!(item instanceof TFolder)) return
+        const folder = item
+        menu.addItem((menuItem) => {
+          menuItem
+            .setTitle("New Nodepad Space")
+            .setIcon("layout-dashboard")
+            .onClick(() => this.createNewSpace(folder.path))
+        })
+      })
+    )
+
     this.addSettingTab(new NodepadSettingTab(this.app, this))
   }
 
-  async createNewSpace() {
-    const name = `Untitled Space ${Date.now()}.nodepad`
-    const file = await this.app.vault.create(name, JSON.stringify({ nodes: [] }, null, 2))
+  async createNewSpace(folderPath?: string) {
+    const filename = `Untitled Space ${Date.now()}.nodepad`
+    const path = folderPath ? `${folderPath}/${filename}` : filename
+    const initialData = JSON.stringify(
+      { version: 1, blocks: [], collapsedIds: [], ghostNotes: [] },
+      null,
+      2
+    )
+    const file = await this.app.vault.create(path, initialData)
     const leaf = this.app.workspace.getLeaf("tab")
     await leaf.openFile(file)
   }
