@@ -75,7 +75,10 @@ export class NodepadView extends TextFileView {
 
   setViewData(data: string, clear: boolean) {
     this.fileData = data
-    if (!this.root || clear) this.renderRoot()
+    if (clear || !this.root) {
+      if (this.root) { this.root.unmount(); this.root = null }
+      this.renderRoot()
+    }
   }
 
   getViewData() { return this.fileData }
