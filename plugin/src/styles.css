@@ -5,12 +5,60 @@
 @source "../../app/**/*.tsx";
 @source "../src/**/*.tsx";
 
-/* Map Tailwind's semantic tokens to Obsidian's CSS variables */
+/* ── Nodepad content-type accent colours ─────────────────────────────────────
+   These are design constants — they don't adapt to Obsidian's theme colour.
+   Scoped broadly so they're available even when the host body has a theme class. */
+:root,
+.theme-dark,
+.theme-light {
+  --type-entity:     oklch(0.65 0.12 250);
+  --type-claim:      oklch(0.75 0.15 80);
+  --type-question:   oklch(0.68 0.18 290);
+  --type-task:       oklch(0.72 0.14 195);
+  --type-idea:       oklch(0.72 0.22 340);
+  --type-reference:  oklch(0.65 0.15 230);
+  --type-quote:      oklch(0.72 0.19 155);
+  --type-definition: oklch(0.7  0.13 220);
+  --type-opinion:    oklch(0.7  0.18 340);
+  --type-reflection: oklch(0.65 0.2  300);
+  --type-narrative:  oklch(0.72 0.16 50);
+  --type-comparison: oklch(0.68 0.14 180);
+  --type-thesis:     oklch(0.86 0.19 88);
+  --type-general:    oklch(0.55 0.02 260);
+  --thesis-accent:   oklch(0.7  0.15 200);
+}
+
+/* ── Tailwind semantic token → Obsidian variable mapping ─────────────────── */
 @theme {
-  --color-background: var(--background-primary);
-  --color-foreground: var(--text-normal);
-  --color-muted: var(--text-muted);
-  --color-border: var(--background-modifier-border);
+  --color-background:            var(--background-primary);
+  --color-foreground:            var(--text-normal);
+  --color-card:                  var(--background-secondary-alt, var(--background-secondary));
+  --color-card-foreground:       var(--text-normal);
+  --color-primary:               var(--interactive-accent);
+  --color-primary-foreground:    var(--background-primary);
+  --color-secondary:             var(--background-secondary);
+  --color-secondary-foreground:  var(--text-normal);
+  --color-muted:                 var(--background-secondary);
+  --color-muted-foreground:      var(--text-muted);
+  --color-border:                var(--background-modifier-border);
+  --color-destructive:           oklch(0.577 0.245 27.325);
+  --color-ring:                  var(--interactive-accent);
+  /* Content-type colour tokens so Tailwind bg-[var(--type-*)] classes resolve */
+  --color-type-entity:           var(--type-entity);
+  --color-type-claim:            var(--type-claim);
+  --color-type-question:         var(--type-question);
+  --color-type-task:             var(--type-task);
+  --color-type-idea:             var(--type-idea);
+  --color-type-reference:        var(--type-reference);
+  --color-type-quote:            var(--type-quote);
+  --color-type-definition:       var(--type-definition);
+  --color-type-opinion:          var(--type-opinion);
+  --color-type-reflection:       var(--type-reflection);
+  --color-type-narrative:        var(--type-narrative);
+  --color-type-comparison:       var(--type-comparison);
+  --color-type-thesis:           var(--type-thesis);
+  --color-type-general:          var(--type-general);
+  --color-thesis-accent:         var(--thesis-accent);
 }
 
 .nodepad-view {
