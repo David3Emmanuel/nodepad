@@ -98,8 +98,11 @@ export class NodepadView extends TextFileView {
   }
 
   private renderRoot() {
+    const container = this.containerEl.children[1] as HTMLElement
+    container.style.height = "100%"
+    container.style.overflow = "hidden"
     if (!this.root) {
-      this.root = createRoot(this.containerEl.children[1])
+      this.root = createRoot(container)
     }
     this.root.render(
       <React.StrictMode>
@@ -506,7 +509,7 @@ function NodepadApp({ plugin, initialData, fileName, onSave }: NodepadAppProps) 
   const modelLabel = hasKey ? plugin.settings.modelId.split("/").pop() : undefined
 
   return (
-    <div className="flex h-dvh overflow-hidden bg-background">
+    <div className="flex h-full overflow-hidden bg-background">
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <StatusBar
           blockCount={blocks.length}
