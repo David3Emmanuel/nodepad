@@ -80,8 +80,8 @@ export function VimInput({ onSubmit, onCommand, isCommandKOpen, setIsCommandKOpe
   // Section 2: actions [viewCount+navCount .. total)
   const sections = React.useMemo(() => [
     { start: 0,                    count: viewCount,   cols: 3 },
-    { start: viewCount,            count: navCount,    cols: 4 },
-    { start: viewCount + navCount, count: actionCount, cols: 5 },
+    { start: viewCount,            count: navCount,    cols: navCount },
+    { start: viewCount + navCount, count: actionCount, cols: actionCount },
   ], [viewCount, navCount, actionCount])
 
   const getSectionForIdx = React.useCallback((idx: number) => {
@@ -270,7 +270,7 @@ export function VimInput({ onSubmit, onCommand, isCommandKOpen, setIsCommandKOpe
                 {navItems.length > 0 && (
                   <div className="border-t border-white/10 pt-3">
                     <p className="px-1 pb-2 font-mono text-[8px] font-bold uppercase tracking-[0.2em] text-white/45">Navigate</p>
-                    <div className="grid grid-cols-4 gap-1.5">
+                    <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${navItems.length}, minmax(0, 1fr))` }}>
                       {navItems.map((item, i) => {
                         const idx     = viewCount + i
                         const focused = focusedIdx === idx
@@ -298,7 +298,7 @@ export function VimInput({ onSubmit, onCommand, isCommandKOpen, setIsCommandKOpe
                 {actionItems.length > 0 && (
                   <div className="border-t border-white/10 pt-3">
                     <p className="px-1 pb-2 font-mono text-[8px] font-bold uppercase tracking-[0.2em] text-white/45">Actions</p>
-                    <div className="grid grid-cols-5 gap-1.5">
+                    <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${actionItems.length}, minmax(0, 1fr))` }}>
                       {actionItems.map((item, i) => {
                         const idx     = viewCount + navCount + i
                         const focused = focusedIdx === idx
