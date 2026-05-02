@@ -104,15 +104,22 @@ export class NodepadView extends TextFileView {
     if (!this.root) {
       this.root = createRoot(container)
     }
+    const plugin = this.plugin
     this.root.render(
       <React.StrictMode>
         <NodepadApp
-          plugin={this.plugin}
+          plugin={plugin}
           initialData={this.fileData}
           fileName={this.file?.basename}
           onSave={(data) => {
             this.fileData = data
             this.requestSave()
+          }}
+          onMenuClick={() => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const setting = (plugin.app as any).setting
+            setting?.open()
+            setting?.openTabById(plugin.manifest.id)
           }}
         />
       </React.StrictMode>
@@ -127,9 +134,10 @@ interface NodepadAppProps {
   initialData: string
   fileName?: string
   onSave: (data: string) => void
+  onMenuClick: () => void
 }
 
-function NodepadApp({ plugin, initialData, fileName, onSave }: NodepadAppProps) {
+function NodepadApp({ plugin, initialData, fileName, onSave, onMenuClick }: NodepadAppProps) {
   const parsed = useMemo(() => parseFileData(initialData), [initialData])
 
   const [blocks, setBlocks] = useState<TextBlock[]>(parsed.blocks)
@@ -519,7 +527,7 @@ function NodepadApp({ plugin, initialData, fileName, onSave }: NodepadAppProps) 
           isIndexOpen={isIndexOpen}
           isGhostPanelOpen={isGhostPanelOpen}
           ghostNoteCount={ghostNotes.filter(n => !n.isGenerating).length}
-          onMenuClick={() => {}}
+          onMenuClick={onMenuClick}
           onIndexToggle={() => setIsIndexOpen(prev => !prev)}
           onGhostPanelToggle={() => setIsGhostPanelOpen(prev => !prev)}
           modelLabel={modelLabel}
