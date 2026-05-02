@@ -10,12 +10,12 @@ import {
 import { Command } from "cmdk"
 import { useModKey } from "@/lib/utils"
 
-const ACTION_ITEMS = [
-  { id: "export-nodepad", icon: FolderDown,  label: "Export",  sub: ".nodepad"  },
-  { id: "import-nodepad", icon: FolderInput, label: "Import",  sub: ".nodepad"  },
-  { id: "export-md",      icon: Download,    label: "Export",  sub: "markdown"  },
-  { id: "copy-md",        icon: Clipboard,   label: "Copy",    sub: "markdown"  },
-  { id: "clear",          icon: Trash2,      label: "Clear",   sub: "canvas"    },
+const ALL_ACTION_ITEMS = [
+  { id: "export-nodepad", icon: FolderDown,  label: "Export",  sub: ".nodepad", pluginOnly: false },
+  { id: "import-nodepad", icon: FolderInput, label: "Import",  sub: ".nodepad", pluginOnly: false },
+  { id: "export-md",      icon: Download,    label: "Export",  sub: "markdown", pluginOnly: true  },
+  { id: "copy-md",        icon: Clipboard,   label: "Copy",    sub: "markdown", pluginOnly: true  },
+  { id: "clear",          icon: Trash2,      label: "Clear",   sub: "canvas",   pluginOnly: true  },
 ]
 
 // ─── Props ───────────────────────────────────────────────────────────────────
@@ -25,11 +25,12 @@ interface VimInputProps {
   onCommand: (cmd: string, text?: string) => void
   isCommandKOpen: boolean
   setIsCommandKOpen: (open: boolean) => void
+  isPlugin?: boolean
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function VimInput({ onSubmit, onCommand, isCommandKOpen, setIsCommandKOpen }: VimInputProps) {
+export function VimInput({ onSubmit, onCommand, isCommandKOpen, setIsCommandKOpen, isPlugin }: VimInputProps) {
   const [value, setValue] = React.useState("")
   const [search, setSearch] = React.useState("")
   const [focusedIdx, setFocusedIdx] = React.useState(0)
@@ -48,13 +49,20 @@ export function VimInput({ onSubmit, onCommand, isCommandKOpen, setIsCommandKOpe
   ], [])
 
   const NAV_ITEMS = React.useMemo(() => [
-    { id: "open-projects",  icon: FolderOpen, label: "Projects",    sub: "" },
-    { id: "new-project",    icon: FolderPlus, label: "New Project", sub: "" },
-    { id: "open-index",     icon: BookOpen,   label: "Index",       sub: "" },
-    { id: "open-synthesis", icon: Sparkles,   label: "Synthesis",   sub: "" },
-  ], [])
+    ...(!isPlugin ? [
+      { id: "open-projects", icon: FolderOpen, label: "Projects",    sub: "" },
+      { id: "new-project",   icon: FolderPlus, label: "New Project", sub: "" },
+    ] : []),
+    { id: "open-index",     icon: BookOpen,  label: "Index",       sub: "" },
+    { id: "open-synthesis", icon: Sparkles,  label: "Synthesis",   sub: "" },
+  ], [isPlugin])
 
   // ── Filtered items ──────────────────────────────────────────────────────
+
+  const ACTION_ITEMS = React.useMemo(
+    () => ALL_ACTION_ITEMS.filter(i => isPlugin ? i.pluginOnly : true),
+    [isPlugin]
+  )
 
   const q = search.toLowerCase()
   const viewItems   = q ? VIEW_ITEMS.filter(i => i.label.toLowerCase().includes(q) || i.sub.toLowerCase().includes(q))   : VIEW_ITEMS

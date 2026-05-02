@@ -631,6 +631,7 @@ function NodepadApp({ plugin, initialData, fileName, onSave, onMenuClick, portal
           onCommand={handleCommand}
           isCommandKOpen={isCommandKOpen}
           setIsCommandKOpen={setIsCommandKOpen}
+          isPlugin
         />
       </div>
 
