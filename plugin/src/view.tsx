@@ -470,8 +470,8 @@ function NodepadApp({ plugin, initialData, fileName, onSave }: NodepadAppProps) 
         else if (isGhostPanelOpen) setIsGhostPanelOpen(false)
       }
     }
-    window.addEventListener("keydown", handleKeys)
-    return () => window.removeEventListener("keydown", handleKeys)
+    window.addEventListener("keydown", handleKeys, { capture: true })
+    return () => window.removeEventListener("keydown", handleKeys, { capture: true })
   }, [isCommandKOpen, isGhostPanelOpen, undo])
 
   // ── Command handler ───────────────────────────────────────────────────────
