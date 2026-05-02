@@ -84,7 +84,13 @@ export class NodepadView extends TextFileView {
   getViewData() { return this.fileData }
   clear() { this.fileData = "" }
 
-  async onOpen() {}
+  async onOpen() {
+    this.registerEvent(
+      this.app.vault.on("rename", (file) => {
+        if (file === this.file) this.renderRoot()
+      })
+    )
+  }
 
   async onClose() {
     this.root?.unmount()
