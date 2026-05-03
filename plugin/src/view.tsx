@@ -157,6 +157,7 @@ export class NodepadView extends TextFileView {
           plugin={plugin}
           initialData={this.fileData}
           fileName={this.file?.basename}
+          folderPath={this.file?.parent?.path}
           onSave={(data) => {
             this.fileData = data
             this.requestSave()
@@ -180,12 +181,13 @@ interface NodepadAppProps {
   plugin: NodepadPlugin
   initialData: string
   fileName?: string
+  folderPath?: string
   onSave: (data: string) => void
   onMenuClick: () => void
   portalContainer?: HTMLElement
 }
 
-function NodepadApp({ plugin, initialData, fileName, onSave, onMenuClick, portalContainer }: NodepadAppProps) {
+function NodepadApp({ plugin, initialData, fileName, folderPath, onSave, onMenuClick, portalContainer }: NodepadAppProps) {
   const parsed = useMemo(() => parseFileData(initialData), [initialData])
 
   const [blocks, setBlocks] = useState<TextBlock[]>(parsed.blocks)
@@ -531,7 +533,8 @@ function NodepadApp({ plugin, initialData, fileName, onSave, onMenuClick, portal
     else if (cmd === "export-md") {
       const md = exportToMarkdown(fileName ?? "Nodepad", blocksRef.current)
       const slug = (fileName ?? "Nodepad").toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
-      plugin.app.vault.create(`${slug}-export.md`, md)
+      const exportPath = folderPath && folderPath !== "/" ? `${folderPath}/${slug}-export.md` : `${slug}-export.md`
+      plugin.app.vault.create(exportPath, md)
         .then(() => new Notice("Markdown saved to vault"))
         .catch(() => {
           copyToClipboard(md)
