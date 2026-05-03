@@ -35,22 +35,65 @@ interface NodepadData {
 function parseFileData(raw: string): NodepadData {
   try {
     const parsed = JSON.parse(raw || "{}")
+    const src = parsed.project ?? {}
     return {
       version: parsed.version ?? 1,
-      blocks: parsed.blocks ?? [],
-      collapsedIds: parsed.collapsedIds ?? [],
-      ghostNotes: (parsed.ghostNotes ?? []).map((n: GhostNote) => ({
+      blocks: (src.blocks ?? []).map((b: TextBlock) => ({
+        ...b,
+        isEnriching: false,
+        isError: false,
+        statusText: undefined,
+      })),
+      collapsedIds: src.collapsedIds ?? [],
+      ghostNotes: (src.ghostNotes ?? []).map((n: GhostNote) => ({
         ...n,
         isGenerating: false,
       })),
-      lastGhostBlockCount: parsed.lastGhostBlockCount,
-      lastGhostTimestamp: parsed.lastGhostTimestamp,
-      lastGhostTexts: parsed.lastGhostTexts,
-      viewMode: parsed.viewMode ?? "tiling",
+      lastGhostBlockCount: src.lastGhostBlockCount,
+      lastGhostTimestamp:  src.lastGhostTimestamp,
+      lastGhostTexts:      src.lastGhostTexts,
+      viewMode: src.viewMode ?? "tiling",
     }
   } catch {
     return { version: 1, blocks: [], collapsedIds: [], ghostNotes: [], viewMode: "tiling" }
   }
+}
+
+/** Serialise state back to NodepadFile format (compatible with the web app). */
+function serialiseFileData(
+  fileName: string | undefined,
+  blocks: TextBlock[],
+  collapsedIds: string[],
+  ghostNotes: GhostNote[],
+  lastGhostBlockCount: number,
+  lastGhostTimestamp: number,
+  lastGhostTexts: string[],
+  viewMode: "tiling" | "kanban" | "graph",
+): string {
+  return JSON.stringify(
+    {
+      version: 1,
+      exportedAt: Date.now(),
+      project: {
+        id: generateId(),
+        name: fileName ?? "Nodepad",
+        blocks: blocks.map((b) => ({
+          ...b,
+          isEnriching: undefined,
+          isError: undefined,
+          statusText: undefined,
+        })),
+        collapsedIds,
+        ghostNotes: ghostNotes.filter((n) => !n.isGenerating),
+        lastGhostBlockCount,
+        lastGhostTimestamp,
+        lastGhostTexts,
+        viewMode,
+      },
+    },
+    null,
+    2,
+  )
 }
 
 function generateId() {
@@ -175,22 +218,10 @@ function NodepadApp({ plugin, initialData, fileName, onSave, onMenuClick, portal
       hasMountedRef.current = true
       return
     }
-    const data: NodepadData = {
-      version: 1,
-      blocks: blocks.map(b => ({
-        ...b,
-        isEnriching: false,
-        isError: false,
-        statusText: undefined,
-      })),
-      collapsedIds,
-      ghostNotes: ghostNotes.filter(n => !n.isGenerating),
-      lastGhostBlockCount,
-      lastGhostTimestamp,
-      lastGhostTexts,
-      viewMode,
-    }
-    onSave(JSON.stringify(data, null, 2))
+    onSave(serialiseFileData(
+      fileName, blocks, collapsedIds, ghostNotes,
+      lastGhostBlockCount, lastGhostTimestamp, lastGhostTexts, viewMode,
+    ))
   }, [blocks, collapsedIds, ghostNotes, viewMode])
 
   useEffect(() => () => {

@@ -38,8 +38,20 @@ export default class NodepadPlugin extends Plugin {
   async createNewSpace(folderPath?: string) {
     const filename = `Untitled Space ${Date.now()}.nodepad`
     const path = folderPath ? `${folderPath}/${filename}` : filename
+    const spaceName = filename.replace(/\.nodepad$/, "")
     const initialData = JSON.stringify(
-      { version: 1, blocks: [], collapsedIds: [], ghostNotes: [] },
+      {
+        version: 1,
+        exportedAt: Date.now(),
+        project: {
+          id: Math.random().toString(36).substring(2, 10),
+          name: spaceName,
+          blocks: [],
+          collapsedIds: [],
+          ghostNotes: [],
+          viewMode: "tiling",
+        },
+      },
       null,
       2
     )
